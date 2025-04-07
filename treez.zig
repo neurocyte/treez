@@ -9,12 +9,15 @@ pub const StateId = enum(u16) { _ };
 
 pub const InputEncoding = enum(c_uint) {
     utf_8,
-    utf_16,
+    utf_16le,
+    utf_16be,
+    custom,
 };
 
 pub const SymbolType = enum(c_uint) {
     regular,
     anonymous,
+    supertype,
     auxiliary,
 };
 
@@ -30,10 +33,21 @@ pub const Range = extern struct {
     end_byte: u32,
 };
 
+/// This function signature reads one code point from the given string,
+/// returning the number of bytes consumed. It should write the code point
+/// to the `code_point` pointer, or write -1 if the input is invalid.
+/// typedef uint32_t (*DecodeFunction)(
+///     const uint8_t *string,
+///     uint32_t length,
+///     int32_t *code_point
+/// );
+pub const DecodeFunction = ?*const fn ([*c]const u8, u32, [*c]i32) callconv(.c) u32;
+
 pub const Input = extern struct {
     payload: ?*anyopaque,
     read: ?*const fn (payload: ?*anyopaque, byte_index: u32, position: Point, bytes_read: *u32) callconv(.C) [*:0]const u8,
     encoding: InputEncoding,
+    decode: DecodeFunction,
 };
 
 pub const LogType = enum(c_uint) {
