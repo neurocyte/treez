@@ -32,7 +32,7 @@ pub const Range = extern struct {
 
 pub const Input = extern struct {
     payload: ?*anyopaque,
-    read: ?*const fn (payload: ?*anyopaque, byte_index: u32, position: Point, bytes_read: *u32) callconv(.C) [*:0]const u8,
+    read: ?*const fn (payload: ?*anyopaque, byte_index: u32, position: Point, bytes_read: *u32) callconv(.c) [*:0]const u8,
     encoding: InputEncoding,
 };
 
@@ -43,11 +43,11 @@ pub const LogType = enum(c_uint) {
 
 pub const Logger = extern struct {
     context: ?*anyopaque,
-    log_fn: ?*const fn (context: ?*anyopaque, log_type: LogType, log: [*:0]const u8) callconv(.C) void,
+    log_fn: ?*const fn (context: ?*anyopaque, log_type: LogType, log: [*:0]const u8) callconv(.c) void,
 };
 
 const StandardLogger = struct {
-    fn log(context: ?*anyopaque, log_type: LogType, msg: [*:0]const u8) callconv(.C) void {
+    fn log(context: ?*anyopaque, log_type: LogType, msg: [*:0]const u8) callconv(.c) void {
         _ = context;
 
         switch (log_type) {
@@ -69,7 +69,7 @@ pub const InputEdit = extern struct {
 pub const Language = opaque {
     pub const GetError = error{Unknown};
     pub fn get(comptime language_name: []const u8) GetError!*const Language {
-        const ext = @extern(?*const fn () callconv(.C) ?*const Language, .{
+        const ext = @extern(?*const fn () callconv(.c) ?*const Language, .{
             .name = std.fmt.comptimePrint("tree_sitter_{s}", .{language_name}),
         }) orelse @compileError(std.fmt.comptimePrint("Cannot find extern tree_sitter_{s}", .{language_name}));
 
@@ -831,7 +831,7 @@ pub const Query = opaque {
 };
 
 // TODO: set allocator model; not compatible with Zig's as free doesn't take a length
-// pub extern fn ts_set_allocator(new_malloc: ?*const fn (usize) callconv(.C) ?*anyopaque, new_calloc: ?*const fn (usize, usize) callconv(.C) ?*anyopaque, new_realloc: ?*const fn (?*anyopaque, usize) callconv(.C) ?*anyopaque, new_free: ?*const fn (?*anyopaque) callconv(.C) void) void;
+// pub extern fn ts_set_allocator(new_malloc: ?*const fn (usize) callconv(.c) ?*anyopaque, new_calloc: ?*const fn (usize, usize) callconv(.c) ?*anyopaque, new_realloc: ?*const fn (?*anyopaque, usize) callconv(.c) ?*anyopaque, new_free: ?*const fn (?*anyopaque) callconv(.c) void) void;
 
 // Higher level constructs
 
