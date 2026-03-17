@@ -658,11 +658,10 @@ pub const Query = opaque {
     pub fn create(
         language: *const Language,
         source: []const u8,
+        error_offset: *u32,
     ) CreateError!*Query {
-        var error_offset: u32 = 0;
         var error_type: ErrorValues = .none;
-
-        return if (externs.ts_query_new(language, source.ptr, @as(u32, @intCast(source.len)), &error_offset, &error_type)) |query|
+        return if (externs.ts_query_new(language, source.ptr, @as(u32, @intCast(source.len)), error_offset, &error_type)) |query|
             query
         else switch (error_type) {
             .none => unreachable,
