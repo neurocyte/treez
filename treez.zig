@@ -192,6 +192,16 @@ pub const Parser = opaque {
                 error.NoLanguage);
     }
 
+    pub fn parseWithOptions(parser: *Parser, old_tree: ?*Tree, input: Input, options: Options) ParseError!*Tree {
+        return if (externs.ts_parser_parse_with_options(parser, old_tree, input, options)) |tree|
+            tree
+        else
+            (if (parser.getLanguage()) |_|
+                error.Unknown
+            else
+                error.NoLanguage);
+    }
+
     pub fn parseString(parser: *Parser, old_tree: ?*Tree, string: []const u8) ParseError!*Tree {
         return if (externs.ts_parser_parse_string(parser, old_tree, string.ptr, @as(u32, @intCast(string.len)))) |tree|
             tree
@@ -235,6 +245,17 @@ pub const Parser = opaque {
         externs.ts_parser_print_dot_graphs(parser, file.handle);
     }
 
+    pub const Options = extern struct {
+        payload: ?*anyopaque = null,
+        progress_callback: ?*const fn (state: *State) callconv(.c) bool = null,
+    };
+
+    pub const State = extern struct {
+        payload: ?*anyopaque = null,
+        current_byte_offset: u32,
+        has_error: bool,
+    };
+
     pub const externs = struct {
         pub extern fn ts_parser_new() ?*Parser;
         pub extern fn ts_parser_delete(parser: ?*Parser) void;
@@ -243,6 +264,7 @@ pub const Parser = opaque {
         pub extern fn ts_parser_set_included_ranges(self: ?*Parser, ranges: [*]const Range, length: u32) bool;
         pub extern fn ts_parser_included_ranges(self: ?*const Parser, length: *u32) [*]const Range;
         pub extern fn ts_parser_parse(self: ?*Parser, old_tree: ?*const Tree, input: Input) ?*Tree;
+        pub extern fn ts_parser_parse_with_options(self: ?*Parser, old_tree: ?*const Tree, input: Input, options: Options) ?*Tree;
         pub extern fn ts_parser_parse_string(self: ?*Parser, old_tree: ?*const Tree, string: [*]const u8, length: u32) ?*Tree;
         pub extern fn ts_parser_parse_string_encoding(self: ?*Parser, old_tree: ?*const Tree, string: [*]const u8, length: u32, encoding: InputEncoding) ?*Tree;
         pub extern fn ts_parser_reset(self: ?*Parser) void;
