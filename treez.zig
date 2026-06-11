@@ -213,7 +213,7 @@ pub const Parser = opaque {
     }
 
     pub fn parseStringWithEncoding(parser: *Parser, old_tree: ?*Tree, string: []const u8, encoding: InputEncoding) ParseError!*Tree {
-        return if (externs.ts_parser_parse_string(parser, old_tree, string.ptr, @as(u32, @intCast(string.len)), encoding)) |tree|
+        return if (externs.ts_parser_parse_string_encoding(parser, old_tree, string.ptr, @as(u32, @intCast(string.len)), encoding)) |tree|
             tree
         else
             (if (parser.getLanguage()) |_|
